@@ -1,7 +1,7 @@
 # Bitácora del Proyecto LFS
 
 **Integrantes:** Marcelo Avalos  
-**Fecha de inicio:** 16 de Noviembre
+**Fecha de inicio:** 17 de Noviembre
 
 ---
 
