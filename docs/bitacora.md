@@ -162,3 +162,105 @@ Utilicé inteligencia artificial para ayudar a mejorar el formato Markdown y la 
 
 ```
 ```
+
+## Sesión 3: 18 de Noviembre - 21:06 a 22:09 - Configuración del Entorno LFS y Descarga de Paquetes
+
+**Duración:** 1 hora aprox.
+**Participantes:** Marcelo Avalos
+**Objetivo:** Configurar entorno LFS, crear estructura de directorios y descargar todos los paquetes fuente
+### Tareas Realizadas
+
+- [x] Configurar variable de entorno LFS
+- [x] Establecer umask para permisos seguros
+- [x] Montar partición LFS en el punto de montaje
+- [x] Configurar permisos de ownership y acceso
+- [x] Crear directorio sources con permisos adecuados
+- [x] Descargar paquetes fuente usando wget-list-systemd
+- [x] Completar descargas faltantes desde mirror alternativo
+- [x] Verificar integridad con md5sums
+
+### Comandos Ejecutados
+```bash
+
+# Configurar variables de entorno críticas
+export LFS=/mnt/lfs
+umask 022
+
+# Montar partición LFS
+mkdir -pv $LFS
+mount -v -t ext4 /dev/sda6 $LFS
+
+# Configurar permisos de ownership y acceso
+chown root:root $LFS
+chmod 755 $LFS
+
+# Crear directorio sources y configurar permisos
+mkdir -v $LFS/sources
+chmod -v a+wt $LFS/sources
+
+# Descargar paquetes usando la lista oficial
+wget --input-file=wget-list-systemd --continue --directory-prefix=$LFS/sources
+
+# Descargar paquetes faltantes desde mirror alternativo
+wget --continue --directory-prefix=$LFS/sources https://lfs.gnlug.org/pub/lfs/lfs-packages/12.4/[nombre-paquete-faltante]
+
+# Verificar integridad de los paquetes
+pushd $LFS/sources
+  md5sum -c md5sums
+popd
+```
+
+### Problemas Encontrados
+
+**Problema 1:** Algunos paquetes fallaron en la descarga con la lista oficial
+
+- **Causa:** Problemas de conectividad con los servidores oficiales
+
+- **Solución:** Usar mirror alternativo https://lfs.gnlug.org/pub/lfs/lfs-packages/12.4/ para completar las descargas
+
+**Problema 2**: Necesidad de verificar integridad de paquetes descargados
+
+- **Causa**: Descargas desde múltiples fuentes
+
+- **Solución**: Usar md5sum -c md5sums y  md5sum -c md5sums | grep -v "OK$", regex con grep para validar todos los archivos y verificar si alguna linea no termina con OK.
+
+**Problema 3**: Se apagó inesperadamente la PC
+
+- **Causa**: Corte de electricidad inesperada
+
+- **Solución**: Montar $LFS de nuevo y asegurarse de que todo tenga los privilegios necesarios ejecutando los comandos de permisos nuevamente
+
+### Resultados Obtenidos
+
+    ✅ Variables de entorno LFS configuradas correctamente
+
+    ✅ Partición LFS montada y con permisos adecuados
+
+    ✅ Directorio sources creado con permisos a+wt
+
+    ✅ Todos los paquetes fuente de LFS descargados
+
+    ✅ Integridad de paquetes verificada con md5sums
+
+    ✅ Entorno listo para comenzar la construcción de LFS
+
+### Reflexión Técnica
+
+"La descarga de paquetes desde múltiples mirrors es una práctica común en LFS debido a la disponibilidad variable de los servidores. La verificación con md5sums es crucial para asegurar que no haya corrupción en los archivos fuente. El directorio sources con permisos a+wt permite que múltiples usuarios puedan escribir y acceder temporalmente a los archivos durante el proceso de construcción."
+
+
+### Evidencias
+
+![Privilegio configurado $LFS](../imagenes/sesion3/privilegio-lfs.png)
+*Figura 1: Privilegio configurado $LFS*
+
+![Checkeo de los archivos descargados con md5](../imagenes/sesion3/md5check.png)
+*Figura 2: Checkeo de los archivos descargados con md5*
+
+### Apuntes
+
+Utilicé inteligencia artificial para ayudar a mejorar el formato Markdown y la gramática de la bitácora, así como para consultar comandos desconocidos como hacer el regex para el md5sum check .
+
+```
+```
+
