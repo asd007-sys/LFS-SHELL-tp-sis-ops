@@ -264,3 +264,113 @@ Utilicé inteligencia artificial para ayudar a mejorar el formato Markdown y la 
 ```
 ```
 
+## Sesión 4: 19 de Noviembre - 11:53 a 12:45- Configuración Completa del Usuario LFS y Estructura de Directorios
+
+**Duración:** 1 hora aprox.  
+**Participantes:** Marcelo Avalos  
+**Objetivo:** Crear estructura de directorios LFS, usuario lfs, configurar entorno de construcción
+
+### Tareas Realizadas
+- [x] Crear estructura básica de directorios LFS
+- [x] Crear enlaces simbólicos para compatibilidad
+- [x] Crear directorio lib64 para arquitectura x86_64
+- [x] Crear directorio tools para toolchain temporal
+- [x] Crear grupo y usuario lfs
+- [x] Establecer password para el usuario lfs
+- [x] Transferir ownership de directorios LFS al usuario lfs
+- [x] Configurar archivos de entorno (.bash_profile y .bashrc)
+- [x] Verificar carga correcta de variables de entorno
+
+### Comandos Ejecutados
+```bash
+# Crear estructura básica de directorios LFS
+mkdir -pv $LFS/{etc,var} $LFS/usr/{bin,lib,sbin}
+
+# Crear enlaces simbólicos para compatibilidad
+for i in bin lib sbin; do
+  ln -sv usr/$i $LFS/$i
+done
+
+# Crear lib64 para arquitecturas x86_64
+case $(uname -m) in
+  x86_64) mkdir -pv $LFS/lib64 ;;
+esac
+
+# Crear directorio tools para toolchain temporal cruzada
+mkdir -pv $LFS/tools
+
+# Crear grupo y usuario lfs para construcción
+groupadd lfs
+useradd -s /bin/bash -g lfs -m -k /dev/null lfs
+passwd lfs
+
+# Transferir ownership de directorios críticos al usuario lfs
+chown -v lfs $LFS/{usr{,/*},var,etc,tools}
+case $(uname -m) in
+  x86_64) chown -v lFS/lib64 ;;
+esac
+
+# Configurar archivos de entorno del usuario lfs
+cat > ~/.bash_profile << "EOF"
+...
+EOF
+
+cat > ~/.bashrc << "EOF"
+....
+EOF
+
+#Instalar tree
+como root
+dnf install tree
+tree /mnt/lfs 
+
+### Verificar configuración completa
+ls -la $LFS/
+ls -la $LFS/tools
+id lfs
+source ~/.bash_profile
+echo "LFS: $LFS"
+echo "LFS_TGT: $LFS_TGT"
+```
+### Problemas Encontrados
+
+No se encontraron problemas significativos - toda la configuración se completó exitosamente.
+Resultados Obtenidos
+
+    ✅ Estructura de directorios LFS creada correctamente
+
+    ✅ Enlaces simbólicos configurados para compatibilidad
+
+    ✅ Directorio tools creado para toolchain temporal cruzada
+
+    ✅ Usuario lfs creado y configurado
+
+    ✅ Dueño de directorios transferido al usuario lfs
+
+    ✅ Archivos de entorno configurados y verificados
+
+    ✅ Entorno completamente preparado para comenzar toolchain temporal
+
+### Reflexión Técnica
+
+"La estructura de directorios LFS sigue el Filesystem Hierarchy Standard moderno donde /bin, /lib y /sbin son enlaces simbólicos a /usr. El directorio /tools es crucial para alojar la toolchain temporal cruzada, separándola del sistema host. La creación del usuario lfs dedicado asegura un entorno limpio y aislado para la construcción."
+### Evidencias
+
+![Tree de LFS 1](../imagenes/sesion4/tree_de_lfs_1.png)
+*Figura 1: Tree de LFS*
+
+![Tree de LFS 2](../imagenes/sesion4/tree_lfs_part_2.png)
+*Figura 2: Tree de LFS parte 2*
+
+![Privilegios](../imagenes/sesion4/privilegios_y_simbolic-links.png)
+*Figura 3: Privilegios*
+
+
+### Apuntes
+
+Utilicé inteligencia artificial para ayudar a mejorar el formato Markdown y la gramática de la bitácora, así como para consultar comandos como tree para hacer la imagen de la estructura del lfs.
+
+
+```
+```
+
