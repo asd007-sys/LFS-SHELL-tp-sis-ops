@@ -64,3 +64,101 @@ Evidencias
 
 ---
 ---
+
+## Sesión 2: 18 de Noviembre, 19:40 a 20:52 - Preparación Completa del Entorno LFS
+
+**Duración:** 1 hora aprox.
+**Participantes:** Marcelo Avalos  
+**Objetivo:** Verificar requisitos del host, crear partición LFS y preparar entorno completo
+
+### Tareas Realizadas
+- [x] Ejecutar `version-check.sh` del manual LFS
+- [x] Identificar paquetes faltantes en el sistema host
+- [x] Instalar herramientas de desarrollo necesarias
+- [x] Configurar enlace simbólico yacc → bison
+- [x] Crear partición LFS en espacio libre de 21GB
+- [x] Formatear partición LFS como ext4
+- [x] Verificar todas las herramientas requeridas
+
+### Comandos Ejecutados
+```bash
+
+
+# Verificación inicial
+bash version-check.sh
+
+# Instalación de paquetes faltantes
+dnf install bison m4 patch perl 
+dnf install gcc gcc-c++ make
+
+
+# Configuración de yacc
+ln -sv /usr/bin/bison /usr/bin/yacc
+
+# Creación de partición LFS con parted
+parted /dev/sda
+print free          # Ver espacio libre
+parted /dev/sda mkpart primary ext4 40.8GB 63.8GB
+quit
+
+# Formatear partición
+mkfs -t ext4 /dev/sda6
+
+# Verificación final
+bison --version
+yacc --version
+bash version-check.sh
+```
+
+### Problemas Encontrados
+**Problema 1:** Comandos `gcc` y `g++` no encontrados
+- **Causa:** Paquetes de desarrollo no instalados
+- **Solución:** `dnf install gcc gcc-c++ make`
+
+**Problema 2:** `yacc` no encontrado pero `bison` sí estaba disponible
+- **Causa:** Rocky Linux usa bison como reemplazo de yacc
+- **Solución:** `ln -sv /usr/bin/bison /usr/bin/yacc`
+
+**Problema 3:** `texinfo` no disponible en repositorios base
+- **Causa:** Repositorio CRB deshabilitado por defecto
+- **Solución:** 
+```bash
+dnf config-manager --set-enabled crb
+dnf install texinfo
+```
+
+**Problema 4:** Faltaban los paquetes perl, m4 y patch
+- **Causa:** No incluidos en el grupo de desarrollo
+- **Solución:** `dnf install m4 patch perl`
+
+**Problema 5:** Error de symlink - creé `/usr/bin/yac` por error
+- **Causa:** Mal tipeado el comando
+- **Solución:** `rm -v /usr/bin/yac` 
+
+### Resultados Obtenidos
+- ✅ Todas las herramientas de verificación instaladas
+- ✅ `version-check.sh` ejecutado exitosamente
+- ✅ GCC confirmado (versión superior a la mínima requerida)
+- ✅ Partición LFS creada (/dev/sda6 de ~21GB)
+- ✅ Partición formateada como ext4 
+- ✅ Entorno host completamente preparado para LFS
+
+### Reflexión Técnica
+"La preparación del entorno LFS mostró la importancia de verificar meticulosamente cada herramienta. El habilitar el repositorio CRB fue crucial para obtener texinfo. Los problemas con yacc se resolvieron fácilmente con symlinks, pero hay que tener cuidado con los errores de tipeo en los comandos."
+
+### Evidencias
+![Requisitos fallado](../imagenes/sesion2/requisitos-host-fallado.png)
+*Figura 1: Requisitos necesarios a completar*
+
+![Requisitos cumplidos](../imagenes/sesion2/requisitos-host.png)
+*Figura 21: Requisitos necesarios completados*
+
+![Partición LFS creada](../imagenes/sesion2/particion-lfs-sda6.png)
+*Figura 3: Particion LFS creada*
+
+### Apuntes
+
+Utilicé inteligencia artificial para ayudar a mejorar el formato Markdown y la gramática de la bitácora, así como para consultar comandos desconocidos como parted y el repositorio alternativo crb.
+
+```
+```
