@@ -111,7 +111,7 @@ bash version-check.sh
 ```
 
 ### Problemas Encontrados
-**Problema 1:** Comandos `gcc` y `g++` no encontrados
+**Problema 1:** Comandos `gcc`, `g++` y `make` no encontrados
 - **Causa:** Paquetes de desarrollo no instalados
 - **Solución:** `dnf install gcc gcc-c++ make`
 
