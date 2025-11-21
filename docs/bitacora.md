@@ -374,3 +374,159 @@ Utilicé inteligencia artificial para ayudar a mejorar el formato Markdown y la 
 ```
 ```
 
+
+
+-----
+
+
+## Sesión 5: 20 de Noviembre, 19:34 a 22:27 Instalación de la Cadena de Herramientas Cruzada (Pass 1)
+
+
+**Duración:** 3 horas aprox.
+**Participantes:** Marcelo Avalos
+**Objetivo:** Instalar el *cross-toolchain* (Binutils, GCC, Linux Headers y Glibc) en el directorio `$LFS/tools` y la partición `$LFS` para preparar el entorno de compilación cruzada.
+
+
+### Tareas Realizadas
+
+
+  - [x] **5.2. Binutils-2.45 - Pass 1:** Instalación del *cross-linker*.
+  - [x] **5.3. GCC-15.2.0 - Pass 1:** Instalación del *cross-compiler* C y C++.
+  - [x] **5.4. Linux-6.16.1 API Headers:** Instalación de los *headers* del kernel en `$LFS/usr`.
+  - [x] **5.5. Glibc-2.42 - Pass 1:** Instalación de la biblioteca C principal en `$LFS/usr`.
+  - [x] Ejecución y verificación de las pruebas de sanidad (*Sanity Checks*).
+
+
+### Comandos principales ejecutados:
+
+
+#### 1\. Binutils-2.45 - Pass 1
+
+
+```bash
+mkdir -v build; cd build
+../configure --prefix=$LFS/tools --with-sysroot=$LFS --target=$LFS_TGT ...
+make
+make install
+```
+
+
+#### 2\. GCC-15.2.0 - Pass 1
+
+
+```bash
+# Extracción de dependencias (mpfr, gmp, mpc)
+# Aplicación de sed para x86_64
+mkdir -v build; cd build
+../configure --target=$LFS_TGT --prefix=$LFS/tools --with-newlib ...
+make
+make install
+cd ..
+cat gcc/limitx.h ... > $(dirname $($LFS_TGT-gcc -print-libgcc-file-name))/include/limits.h
+```
+
+
+#### 3\. Linux-6.16.1 API Headers
+
+
+```bash
+make mrproper
+make headers
+cp -rv usr/include $LFS/usr
+```
+
+
+#### 4\. Glibc-2.42 - Pass 1
+
+
+```bash
+# Creación de enlaces simbólicos (ld-lsb.so.3, etc.)
+patch -Np1 -i ../glibc-2.42-fhs-1.patch
+mkdir -v build; cd build
+echo "rootsbindir=/usr/sbin" > configparms
+../configure --prefix=/usr --host=$LFS_TGT --enable-kernel=5.4 ...
+make
+make DESTDIR=$LFS install
+sed '/RTLDLIST=/s@/usr@@g' -i $LFS/usr/bin/ldd
+```
+
+
+#### 5\. Pruebas de Sanidad (*Sanity Checks*)
+
+
+```bash
+echo 'int main(){}' | $LFS_TGT-gcc -x c - -v -Wl,--verbose &> dummy.log
+readelf -l a.out | grep ': /lib'
+grep -E -o "$LFS/lib.*/S?crt[1in].*succeeded" dummy.log
+rm -v a.out dummy.log
+```
+
+
+### Resultados:
+
+
+| Paquete | Estado |
+| :--- | :--- |
+| **Binutils-2.45 (P1)** | ✅ Completado |
+| **GCC-15.2.0 (P1)** | ✅ Completado |
+| **Linux API Headers** | ✅ Completado |
+| **Glibc-2.42 (P1)** | ✅ Completado |
+
+
+**Resultado Sanity Check:** Se verificó que el intérprete de programas solicitado (dynamic linker) apunta a la ruta correcta dentro de `$LFS` y que los *start files* fueron localizados con éxito, confirmando que la cadena de herramientas cruzada está funcional.
+
+
+```text
+[Requesting program interpreter: /lib64/ld-linux-x86-64.so.2]
+/mnt/lfs/lib/../lib/Scrt1.o succeeded
+/mnt/lfs/lib/../lib/crti.o succeeded
+/mnt/lfs/lib/../lib/crtn.o succeeded
+```
+
+
+### Problemas Encontrados
+
+
+**Problema:** Durante la configuración de Glibc, el compilador del host arrojó una advertencia de que el programa **`msgfmt` estaba faltando** o era incompatible.
+
+
+```text
+configure: WARNING: *** These auxiliary programs are missing or ... msgfmt ***
+```
+
+
+**Solución:** Se decidió continuar, basándose en la documentación de LFS que indica que **`msgfmt` es parte de Gettext** (internacionalización), una característica no esencial para la construcción de las herramientas temporales, y por lo tanto la advertencia fue inofensiva.
+
+
+**Aprendizaje:** Las advertencias relacionadas con NLS (National Language Support) o internacionalización a menudo pueden ignorarse en la construcción de herramientas temporales.
+
+
+### Reflexión Técnica
+
+
+"Concluye así la instalación de la fase de herramientas cruzadas (Pass 1). Utilizamos la opción `make DESTDIR=$LFS install` en Glibc para asegurar que la biblioteca se instalará en el destino final (`$LFS`) y no en el sistema *host*. La clave fue el éxito de las **Pruebas de Sanidad** que verificaron que el compilador `$LFS_TGT-gcc` está buscando las bibliotecas y *headers* correctos en `$LFS`, garantizando que se está listo para comenzar a compilar los paquetes temporales dentro del *chroot*."
+
+
+### Evidencias
+
+
+![Binutils make install](../imagenes/sesion5/binutils-make-install.png)
+*Figura 1: Binutils make install*
+
+
+![glibc make install](../imagenes/sesion5/make-install-glibc.png)
+*Figura 2: glibc make install*
+
+
+![sanity check glib](../imagenes/sesion5/sanitycheck-glibc.png)
+*Figura 2: sanity check glibc*
+
+
+### Apuntes
+
+
+Se utilizó inteligencia artificial para ayudar a mejorar el formato Markdown y la gramática de la bitácora.
+
+
+
+
