@@ -379,7 +379,7 @@ Utilicé inteligencia artificial para ayudar a mejorar el formato Markdown y la 
 -----
 
 
-## Sesión 5: 20 de Noviembre, 19:34 a 22:27 Instalación de la Cadena de Herramientas Cruzada (Pass 1)
+## Sesión 5: 20 de Noviembre - 19:34 a 22:27 - Instalación de la Cadena de Herramientas Cruzada (Pass 1)
 
 
 **Duración:** 3 horas aprox.
@@ -528,5 +528,150 @@ configure: WARNING: *** These auxiliary programs are missing or ... msgfmt ***
 Se utilizó inteligencia artificial para ayudar a mejorar el formato Markdown y la gramática de la bitácora.
 
 
+```
+```
+
+
+## Sesion 6: 21 de Noviembre, 21:02 a 22:39 - Compilación de Herramientas Temporales (Capítulos 5.6 al 6.4)
+
+**Duración:** 1 hora y media aprox. **Participantes:** Marcelo Avalos **Objetivo:** Compilar Libstdc++ y las primeras herramientas temporales (M4, Ncurses, Bash) en el entorno $LFS para construir el sistema base.
+
+### Tareas Realizadas
+
+    [x] Compilación e instalación de la librería estándar de C++: Libstdc++ (del paquete GCC-15.2.0).
+
+    [x] Compilación e instalación del macro procesador: M4-1.4.20.
+
+    [x] Compilación e instalación de librerías para manejo de pantalla: Ncurses-6.5-20250809.
+
+    [x] Instalación del programa auxiliar tic de Ncurses en $LFS/tools/bin.
+
+    [x] Creación del enlace simbólico libncurses.so a libncursesw.so y ajuste del header curses.h.
+
+    [x] Compilación e instalación del shell Bourne-Again: Bash-5.3.
+
+    [x] Creación del enlace simbólico /bin/sh apuntando a /bin/bash dentro de $LFS.
+
+## Comandos Ejecutados
+
+1. Libstdc++ (del paquete GCC-15.2.0)
+
+
+
+#### Dentro del directorio de las fuentes de GCC
+```bash
+mkdir -v build
+cd build
+../libstdc++-v3/configure ...
+make
+make DESTDIR=$LFS install
+rm -v $LFS/usr/lib/lib{stdc++{,exp,fs},supc++}.la
+
+```
+2. M4-1.4.20
+
+
+```bash
+# Dentro del directorio de las fuentes de M4
+./configure --prefix=/usr   \
+    --host=$LFS_TGT \
+    --build=$(build-aux/config.guess)
+make
+make DESTDIR=$LFS install
+```
+3. Ncurses-6.5-20250809
+
+
+```bash
+# Dentro del directorio de las fuentes de Ncurses
+mkdir build
+pushd build
+  ../configure --prefix=$LFS/tools AWK=gawk
+  make -C include
+  make -C progs tic
+  install progs/tic $LFS/tools/bin
+popd
+
+./configure ...
+make
+make DESTDIR=$LFS install
+ln -sv libncursesw.so $LFS/usr/lib/libncurses.so
+sed -e 's/^#if.*XOPEN.*$/#if 1/' -i $LFS/usr/include/curses.h
+```
+4. Bash-5.3
+
+
+```bash
+# Dentro del directorio de las fuentes de Bash
+./configure ....
+make
+make DESTDIR=$LFS install
+ln -sv bash $LFS/bin/sh
+```
+
+
+```bash
+
+# Siempre borrando las carpetas al terminar de compilar con:
+
+rm -rf $LFS/sources/[nombre_del_directorio]
+```
+⚠️ Problemas Encontrados
+
+    Ningun problema en particular
+
+📊 Resultados Obtenidos
+
+    ✅ Libstdc++ instalado en $LFS/usr/lib y sus headers en $LFS/tools/$LFS_TGT/include/c++/15.2.0, completando el cross-toolchain inicial.
+
+    ✅ M4 instalado exitosamente en el directorio $LFS.
+
+    ✅ Ncurses y su binario tic instalados, preparando las librerías para futuros paquetes que interactúan con la terminal.
+
+    ✅ Bash instalado como el shell principal, con el enlace simbólico /bin/sh creado.
+
+    ✅ El entorno de herramientas temporales está en progreso, listo para continuar con Binutils-2.42.
+
+🧠 Reflexión Técnica
+
+"Esta sesión consolidó el cross-toolchain al instalar Libstdc++ contra la Glibc recién compilada en $LFS. Es clave entender que la compilación cruzada a menudo requiere pasos especiales, como la instalación del programa tic de Ncurses o el uso de opciones como --without-bash-malloc en Bash, que mitigan problemas de estabilidad o dependencia. El proceso avanza con éxito hacia la construcción de un entorno de herramientas temporales completamente funcional."
+
+### Evidencias
+
+
+![libstdc++ make](../imagenes/sesion6/libstdc++_make.png)
+*Figura 1: libstdc++ make*
+
+![libstdc++ make install](../imagenes/sesion6/libstdc++_make_install.png)
+*Figura 2: libstdc++ make install*
+
+![comando remover archivos de libtool](../imagenes/sesion6/commando_rm_libtool_archivos.png)
+*Figura 3: commando remover archivos de libtool*
+
+![Partición LFS creada](../imagenes/sesion6/m4_make.png)
+*Figura 4: make de M4*
+
+![Partición LFS creada](../imagenes/sesion6/m4_make_install.png)
+*Figura 5: make install M4*
+
+![Partición LFS creada](../imagenes/sesion6/ncurses_make.png)
+*Figura 6: make ncurses*
+
+![Partición LFS creada](../imagenes/sesion6/ncurses_make_install.png)
+*Figura 7: make install ncurses*
+
+![Partición LFS creada](../imagenes/sesion6/ln_y_sed_ncurses.png)
+*Figura 8: ln y sed ncurses*
+
+![Partición LFS creada](../imagenes/sesion6/Bash-make.png)
+*Figura 9: make Bash*
+
+![Partición LFS creada](../imagenes/sesion6/Bash-make-install.png)
+*Figura 10: make install Bash*
+
+
+
+### Apuntes
+  Se utilizo inteligencia artificual para mejorar el formateao y gramatica.
 
 
